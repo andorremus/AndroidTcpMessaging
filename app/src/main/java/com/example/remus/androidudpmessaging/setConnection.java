@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 
 public class setConnection extends ActionBarActivity {
@@ -164,6 +165,8 @@ public class setConnection extends ActionBarActivity {
             Settings.setDestinationIp(ipAddress);
             Settings.setRemotePort(remotePort);
             Log.i("Set connections","All conditions fulfilled");
+            Toast toast = Toast.makeText(getApplicationContext(),"Connection set successfully",Toast.LENGTH_LONG);
+            toast.show();
             startChat();
         }
 

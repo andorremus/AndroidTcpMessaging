@@ -18,6 +18,8 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 
 
 public class ChatWindow extends ActionBarActivity {
@@ -25,11 +27,19 @@ public class ChatWindow extends ActionBarActivity {
     DatagramSocket socket;
     private static Integer localPort,remotePort;
     private static String destIp;
+    private Integer conversationLogId;
+    private DatabaseConnection myDB;
+    private Calendar now;
+    private SimpleDateFormat formatter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_window);
+        myDB = new DatabaseConnection();
+        formatter = new SimpleDateFormat("HH:mm:ss");
+
+        conversationLogId = myDB.startConversation();
 
         localPort = Settings.getLocalPort();
         remotePort = Settings.getRemotePort();
@@ -92,6 +102,8 @@ public class ChatWindow extends ActionBarActivity {
             DatagramPacket packet;
             byte[] buf = new byte[256];
             Log.i("Socket Thread ", "Thread running");
+            now = Calendar.getInstance();
+            String date = formatter.format(now.getTime());
 
             try
             {
@@ -100,15 +112,16 @@ public class ChatWindow extends ActionBarActivity {
                 while (true)
                 {
                     final TextView t = (TextView) findViewById(R.id.chatTextView);
-
-
+                    
                     packet = new DatagramPacket(buf, buf.length);
                     socket.receive(packet);
                     System.out.println("Received packet");
                     String s = new String(packet.getData());
 
+                    myDB.insertLine(s,conversationLogId);
+
                     CharSequence cs = t.getText();
-                    str = cs + "\r\n" + s;
+                    str = cs + "\r\n" + date + " "+ s;
                     Log.i("Socket Thread", str);
 
                     t.post(new Runnable()
@@ -131,10 +144,13 @@ public class ChatWindow extends ActionBarActivity {
     class SocketSender implements Runnable
     {
         String str;
-        String username =Settings.getUsername();
+        String username =Settings.getUsername().replace("'","");
+
         @Override
         public void run()
         {
+            now = Calendar.getInstance();
+            String date = formatter.format(now.getTime());
             String s= null;
             final EditText editTextSender = (EditText)findViewById(R.id.editTextSender);
             try
@@ -146,7 +162,7 @@ public class ChatWindow extends ActionBarActivity {
                 Log.i("Socket Sender ",e.getMessage());
             }
 
-
+            myDB.insertLine(s,conversationLogId);
 
             //DatagramSocket socket;
             try
@@ -164,18 +180,19 @@ public class ChatWindow extends ActionBarActivity {
 
                 final TextView t = (TextView) findViewById(R.id.chatTextView);
                 CharSequence cs = t.getText();
-                str = cs + "\r\n" +s;
+                Log.i("Socket Sender",cs.toString());
+                str = cs + "\r\n" + date +" "+s;
                 Log.i("Socket Thread", str);
 
                 t.post(new Runnable()
                        {
                            public void run()
                            {
-                               t.setTextColor(Color.RED);
                                t.setText(str);
                            }
                        }
                 );
+
             }
             catch (SocketException e1)
             {

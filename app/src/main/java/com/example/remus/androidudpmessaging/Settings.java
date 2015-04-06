@@ -30,7 +30,10 @@ public class Settings extends ActionBarActivity {
         editDestIp = (EditText)findViewById(R.id.editTextDestIp);
         editRemotePort = (EditText)findViewById(R.id.editTextRemotePort);
         usernameView = (TextView)findViewById(R.id.textViewUsername);
-        usernameView.setText(getUsername());
+        usernameView.setText(getUsername().replace("'",""));
+        editLocalPort.setText(getLocalPort());
+        editDestIp.setText(getDestinationIp());
+        editRemotePort.setText(getRemotePort());
 
         final Button saveButton =(Button)findViewById(R.id.saveSettingsButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
