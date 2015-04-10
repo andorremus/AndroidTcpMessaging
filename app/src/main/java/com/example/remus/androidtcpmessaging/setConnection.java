@@ -15,7 +15,6 @@ import android.widget.Toast;
 
 public class setConnection extends ActionBarActivity {
 
-    private EditText localPortEdit;
     private EditText ipAddressEdit;
     private EditText remotePortEdit;
     @Override
@@ -23,7 +22,6 @@ public class setConnection extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_set_connection);
 
-        localPortEdit =(EditText)findViewById(R.id.editTextLocalPort);
         ipAddressEdit =(EditText)findViewById(R.id.editTextIpAddress);
         remotePortEdit = (EditText)findViewById(R.id.editTextRemotePort);
 
@@ -33,7 +31,6 @@ public class setConnection extends ActionBarActivity {
             public void onClick(View v)
             {
                 setConnections();
-                // startChat();
 
             }
         });
@@ -68,11 +65,9 @@ public class setConnection extends ActionBarActivity {
 
     private void setConnections()   // This method validates the inputted values and uses them to
     {
-        localPortEdit.setError(null);
         ipAddressEdit.setError(null);
         remotePortEdit.setError(null);
 
-        Integer localPort = null;
         Integer remotePort = null;
 
         boolean cancel = false;
@@ -80,7 +75,6 @@ public class setConnection extends ActionBarActivity {
 
         try
         {
-            localPort = Integer.parseInt(localPortEdit.getText().toString());
             remotePort = Integer.parseInt(remotePortEdit.getText().toString());
         }
         catch (NumberFormatException e)
@@ -106,23 +100,7 @@ public class setConnection extends ActionBarActivity {
         }
 
 
-        String localPortString = null;
-        try
-        {
-            localPortString = localPort.toString();
 
-        }
-        catch (Exception e)
-        {
-
-        }
-        if(TextUtils.isEmpty(localPortString))
-        {
-            localPortEdit.setError("Please write a local port number");
-            cancel = true;
-            focusView = localPortEdit;
-        }
-        Log.i("Set connections", "The local port to be set is :" + localPort);
 
         String ipAddress = ipAddressEdit.getText().toString();
         if(TextUtils.isEmpty(ipAddress))
@@ -161,7 +139,6 @@ public class setConnection extends ActionBarActivity {
         }
         else
         {
-            Settings.setLocalPort(localPort);
             Settings.setDestinationIp(ipAddress);
             Settings.setRemotePort(remotePort);
             Log.i("Set connections","All conditions fulfilled");

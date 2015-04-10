@@ -12,20 +12,17 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 
-public class ChatWindow extends ActionBarActivity {
-
-    DatagramSocket socket;
-    private static Integer localPort,remotePort;
+public class ChatWindow extends ActionBarActivity
+{
+    private static Integer remotePort;
     private static String destIp;
     private Integer conversationLogId;
     private DatabaseConnection myDB;
@@ -34,8 +31,13 @@ public class ChatWindow extends ActionBarActivity {
     private TextView t;
     private Button buttonWholeHistory;
 
+    private Socket sender;
+    private BufferedReader br;
+    private PrintStream bw;
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_chat_window);
         myDB = new DatabaseConnection();
@@ -45,7 +47,6 @@ public class ChatWindow extends ActionBarActivity {
 
         conversationLogId = myDB.startConversation();
 
-        localPort = Settings.getLocalPort();
         remotePort = Settings.getRemotePort();
         destIp = Settings.getDestinationIp();
 
@@ -113,24 +114,21 @@ public class ChatWindow extends ActionBarActivity {
 
         public void run()
         {
-            DatagramPacket packet;
-            byte[] buf = new byte[256];
-            Log.i("Socket Thread ", "Thread running");
+            Log.i("Socket Listener ", "Thread running");
             now = Calendar.getInstance();
             String date = formatter.format(now.getTime());
 
             try
             {
-                socket = new DatagramSocket(localPort);
+
+                sender = new Socket(destIp, remotePort);
+                br = new BufferedReader (new InputStreamReader(sender.getInputStream()));
+                bw = new PrintStream (sender.getOutputStream());
 
                 while (true)
                 {
-
-
-                    packet = new DatagramPacket(buf, buf.length);
-                    socket.receive(packet);
-                    System.out.println("Received packet");
-                    String s = new String(packet.getData(),packet.getOffset(),packet.getLength());
+                    Log.i("Socket Listener loop","Received packet");
+                    String s = br.readLine();
 
                     myDB.insertLine(s,conversationLogId);
 
@@ -147,7 +145,8 @@ public class ChatWindow extends ActionBarActivity {
                            }
                     );
                 }
-            } catch (IOException e) {
+            } catch (Exception e)
+            {
                 Log.e(getClass().getName(), e.getMessage());
             }
 
@@ -162,9 +161,8 @@ public class ChatWindow extends ActionBarActivity {
         @Override
         public void run()
         {
-            now = Calendar.getInstance();
-            String date = formatter.format(now.getTime());
             String s= null;
+
             final EditText editTextSender = (EditText)findViewById(R.id.editTextSender);
             try
             {
@@ -175,50 +173,16 @@ public class ChatWindow extends ActionBarActivity {
                 Log.i("Socket Sender ",e.getMessage());
             }
 
-            myDB.insertLine(s,conversationLogId);
-
-            //DatagramSocket socket;
             try
             {
-                DatagramSocket socket = new DatagramSocket ();
-
-                byte[] buf = new byte[256];
-
-                buf = s.getBytes ();
-                InetAddress address = InetAddress.getByName (destIp);
-                DatagramPacket packet = new DatagramPacket (buf, buf.length, address, remotePort);
-                Log.i ("Socket Sender","About to send message");
-                socket.send (packet);
+                Log.i ("Socket Sender","About to send message"+s);
+                bw.println(s);
                 Log.i ("Socket Sender","Sent message");
 
-                CharSequence cs = t.getText();
-                Log.i("Socket Sender",cs.toString());
-                str = cs + "\r\n" + date +" "+s;
-                Log.i("Socket Thread", str);
-
-                t.post(new Runnable()
-                       {
-                           public void run()
-                           {
-                               t.setText(str);
-                           }
-                       }
-                );
-
             }
-            catch (SocketException e1)
+            catch (Exception e)
             {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
-            }
-            catch (UnknownHostException e2)
-            {
-                // TODO Auto-generated catch block
-                e2.printStackTrace();
-            }
-            catch (IOException e3) {
-                // TODO Auto-generated catch block
-                e3.printStackTrace();
+                System.out.println("Socket Sender Exception" +e.getMessage());
             }
 
 

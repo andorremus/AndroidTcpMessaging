@@ -18,7 +18,7 @@ public class Settings extends ActionBarActivity {
     private static String destinationIp;
     private static Integer localPort,remotePort;
     private static String username;
-    private EditText editLocalPort,editDestIp,editRemotePort;
+    private EditText editDestIp,editRemotePort;
     private TextView usernameView;
 
     @Override
@@ -26,18 +26,16 @@ public class Settings extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        editLocalPort = (EditText) findViewById(R.id.editTextLocalPort);
         editDestIp = (EditText) findViewById(R.id.editTextDestIp);
         editRemotePort = (EditText) findViewById(R.id.editTextRemotePort);
         usernameView = (TextView) findViewById(R.id.textViewUsername);
 
         usernameView.setText(getUsername());
 
-        CharSequence cs1 = getLocalPort().toString();
         CharSequence cs2 = getDestinationIp();
         CharSequence cs3 = getRemotePort().toString();
-        try {
-            editLocalPort.setText(cs1);
+        try
+        {
             editDestIp.setText(cs2);
             editRemotePort.setText(cs3);
         }
@@ -92,25 +90,15 @@ public class Settings extends ActionBarActivity {
 
     private void setSettings()
     {
-        Integer localPort = null;
         Integer remotePort = null;
         String destIp=null;
 
-        editLocalPort.setError(null);
         editDestIp.setError(null);
         editRemotePort.setError(null);
 
         boolean cancel = false;
         View focusView = null;
 
-        try
-        {
-            localPort = Integer.parseInt(editLocalPort.getText().toString());
-        }
-        catch (Exception e)
-        {
-            Log.i("Set Settings",e.getMessage());
-        }
         try
         {
             destIp = editDestIp.getText().toString();
@@ -127,24 +115,6 @@ public class Settings extends ActionBarActivity {
         {
             Log.i("Set Settings",e.getMessage());
         }
-
-        String localPortString = null;
-        try
-        {
-            localPortString = localPort.toString();
-
-        }
-        catch (Exception e)
-        {
-
-        }
-        if(TextUtils.isEmpty(localPortString))
-        {
-            editLocalPort.setError("Please write a local port number");
-            cancel = true;
-            focusView = editLocalPort;
-        }
-        Log.i("Set connections", "The local port to be set is :" + localPort);
 
         if(TextUtils.isEmpty(destIp))
         {
@@ -182,7 +152,6 @@ public class Settings extends ActionBarActivity {
         }
         else
         {
-            Settings.setLocalPort(localPort);
             Settings.setDestinationIp(destIp);
             Settings.setRemotePort(remotePort);
             Log.i("Set connections","All conditions fulfilled");
@@ -213,14 +182,6 @@ public class Settings extends ActionBarActivity {
         Settings.destinationIp = destinationIp;
     }
 
-    public static Integer getLocalPort() {
-        return localPort;
-    }
-
-    public static void setLocalPort(Integer localPort) {
-        Settings.localPort = localPort;
-    }
-
     public static Integer getRemotePort() {
         return remotePort;
     }
@@ -228,6 +189,7 @@ public class Settings extends ActionBarActivity {
     public static void setRemotePort(Integer remotePort) {
         Settings.remotePort = remotePort;
     }
+
     public static String getUsername() {
         return username;
     }
