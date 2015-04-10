@@ -1,4 +1,4 @@
-package com.example.remus.androidudpmessaging;
+package com.example.remus.androidtcpmessaging;
 
 import android.content.Intent;
 import android.database.Cursor;
@@ -228,7 +228,7 @@ public class login_page extends ActionBarActivity
                 {
                     Toast toast = Toast.makeText(getApplicationContext(),"You have been registered succesfully",Toast.LENGTH_LONG);
                     toast.show();
-                    Settings.setUsername(username);
+                    Settings.setUsername("'"+username+"'");
                     Intent i;
                     i = new Intent(this, setConnection.class);
                     i.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);

@@ -1,4 +1,4 @@
-package com.example.remus.androidudpmessaging;
+package com.example.remus.androidtcpmessaging;
 
 import android.app.Application;
 import android.test.ApplicationTestCase;

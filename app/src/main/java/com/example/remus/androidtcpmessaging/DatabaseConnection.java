@@ -1,4 +1,4 @@
-package com.example.remus.androidudpmessaging;
+package com.example.remus.androidtcpmessaging;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -21,7 +21,7 @@ public class DatabaseConnection
     public DatabaseConnection()
     {
 
-        dbConnection = SQLiteDatabase.openOrCreateDatabase("/data/data/com.example.remus.androidudpmessaging/DatabaseConnection.db", null);
+        dbConnection = SQLiteDatabase.openOrCreateDatabase("/data/data/com.example.remus.androidtcpmessaging/DatabaseConnection.db", null);
         formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
         dbConnection .execSQL("CREATE TABLE IF NOT EXISTS `users` (`username` TEXT NOT NULL, `password` TEXT NOT NULL, PRIMARY KEY(username));");
@@ -112,6 +112,32 @@ public class DatabaseConnection
             dbConnection.endTransaction();
             cursor.close();
         }
+    }
+
+    public String retrieveHistory()
+    {
+        String username = Settings.getUsername();
+        String conversations = "";
+
+        if(username.contains("'"))
+        {
+            username = username.replace("'","");
+        }
+
+        cursor = dbConnection.rawQuery("select conversation_log_lines.datetime,conversation_log_lines.text from conversation_log join conversation_log_lines on " +
+                "conversation_log.logId = conversation_log_lines.logId where conversation_log.username = '"+username+"'",null);
+
+        if(cursor.moveToFirst())
+        {
+            int dateColumnIdx = cursor.getColumnIndex("datetime");
+            int textColumnIdx = cursor.getColumnIndex("text");
+            while (cursor.moveToNext())
+            {
+                conversations = conversations + cursor.getString(dateColumnIdx) +" "+ cursor.getString(textColumnIdx) + "\r\n";
+            }
+        }
+
+        return conversations;
     }
 
 

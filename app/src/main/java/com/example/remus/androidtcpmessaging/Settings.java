@@ -1,4 +1,4 @@
-package com.example.remus.androidudpmessaging;
+package com.example.remus.androidtcpmessaging;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -26,14 +26,25 @@ public class Settings extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
-        editLocalPort = (EditText)findViewById(R.id.editTextLocalPort);
-        editDestIp = (EditText)findViewById(R.id.editTextDestIp);
-        editRemotePort = (EditText)findViewById(R.id.editTextRemotePort);
-        usernameView = (TextView)findViewById(R.id.textViewUsername);
-        usernameView.setText(getUsername().replace("'",""));
-        editLocalPort.setText(getLocalPort());
-        editDestIp.setText(getDestinationIp());
-        editRemotePort.setText(getRemotePort());
+        editLocalPort = (EditText) findViewById(R.id.editTextLocalPort);
+        editDestIp = (EditText) findViewById(R.id.editTextDestIp);
+        editRemotePort = (EditText) findViewById(R.id.editTextRemotePort);
+        usernameView = (TextView) findViewById(R.id.textViewUsername);
+
+        usernameView.setText(getUsername());
+
+        CharSequence cs1 = getLocalPort().toString();
+        CharSequence cs2 = getDestinationIp();
+        CharSequence cs3 = getRemotePort().toString();
+        try {
+            editLocalPort.setText(cs1);
+            editDestIp.setText(cs2);
+            editRemotePort.setText(cs3);
+        }
+        catch (Exception e)
+        {
+            Log.i("On Create Settings",e.getMessage());
+        }
 
         final Button saveButton =(Button)findViewById(R.id.saveSettingsButton);
         saveButton.setOnClickListener(new View.OnClickListener() {

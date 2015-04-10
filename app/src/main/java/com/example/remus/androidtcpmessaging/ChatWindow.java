@@ -1,9 +1,9 @@
-package com.example.remus.androidudpmessaging;
+package com.example.remus.androidtcpmessaging;
 
 import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.text.method.ScrollingMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -31,6 +31,8 @@ public class ChatWindow extends ActionBarActivity {
     private DatabaseConnection myDB;
     private Calendar now;
     private SimpleDateFormat formatter;
+    private TextView t;
+    private Button buttonWholeHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +40,8 @@ public class ChatWindow extends ActionBarActivity {
         setContentView(R.layout.activity_chat_window);
         myDB = new DatabaseConnection();
         formatter = new SimpleDateFormat("HH:mm:ss");
+        t = (TextView) findViewById(R.id.chatTextView);
+        t.setMovementMethod(new ScrollingMovementMethod());
 
         conversationLogId = myDB.startConversation();
 
@@ -55,6 +59,16 @@ public class ChatWindow extends ActionBarActivity {
             {
                 Thread sender = new Thread(new SocketSender());
                 sender.start();
+            }
+        });
+
+        buttonWholeHistory = (Button)findViewById(R.id.buttonWholeHistory);
+        buttonWholeHistory.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v)
+            {
+                loadHistory();
+
             }
         });
     }
@@ -111,12 +125,12 @@ public class ChatWindow extends ActionBarActivity {
 
                 while (true)
                 {
-                    final TextView t = (TextView) findViewById(R.id.chatTextView);
-                    
+
+
                     packet = new DatagramPacket(buf, buf.length);
                     socket.receive(packet);
                     System.out.println("Received packet");
-                    String s = new String(packet.getData());
+                    String s = new String(packet.getData(),packet.getOffset(),packet.getLength());
 
                     myDB.insertLine(s,conversationLogId);
 
@@ -128,7 +142,6 @@ public class ChatWindow extends ActionBarActivity {
                            {
                                public void run()
                                {
-                                   t.setTextColor(Color.BLUE);
                                    t.setText(str);
                                }
                            }
@@ -155,7 +168,7 @@ public class ChatWindow extends ActionBarActivity {
             final EditText editTextSender = (EditText)findViewById(R.id.editTextSender);
             try
             {
-               s = username +" : " + editTextSender.getText().toString();
+                s = username +" : " + editTextSender.getText().toString();
             }
             catch (Exception e)
             {
@@ -178,7 +191,6 @@ public class ChatWindow extends ActionBarActivity {
                 socket.send (packet);
                 Log.i ("Socket Sender","Sent message");
 
-                final TextView t = (TextView) findViewById(R.id.chatTextView);
                 CharSequence cs = t.getText();
                 Log.i("Socket Sender",cs.toString());
                 str = cs + "\r\n" + date +" "+s;
@@ -212,6 +224,29 @@ public class ChatWindow extends ActionBarActivity {
 
         }
 
-        }
     }
+
+    public void loadHistory()
+    {
+        String history = myDB.retrieveHistory();
+        final String str;
+
+        CharSequence cs = t.getText();
+        str = history + "\r\n"+ cs ;
+        Log.i("Socket Thread", str);
+
+        t.post(new Runnable()
+               {
+                   public void run()
+                   {
+                       t.setText(str);
+                   }
+               }
+        );
+
+        buttonWholeHistory.setClickable(false);
+
+
+    }
+}
 

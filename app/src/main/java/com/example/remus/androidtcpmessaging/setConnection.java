@@ -1,4 +1,4 @@
-package com.example.remus.androidudpmessaging;
+package com.example.remus.androidtcpmessaging;
 
 import android.content.Intent;
 import android.os.Bundle;
